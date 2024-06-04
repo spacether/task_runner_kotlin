@@ -1,0 +1,50 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>All Current Tasks</title>
+</head>
+<body>
+<h1>All Current Tasks</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>FileName</th>
+        <th>Minute</th>
+        <th>Hour</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="task: ${tasks}">
+        <td th:text="${task.name}"></td>
+        <td th:text="${task.fileName}"></td>
+        <td th:text="${task.minute}"></td>
+        <td th:text="${task.hour}"></td>
+        <td th:text="${task.status}"></td>
+    </tr>
+    </tbody>
+</table>
+<h2>Add A Task</h2>
+<form method="post" action="/tasks">
+    <div>
+        <label for="name">Name: </label>
+        <input type="text" id="name" name="name" size="10">
+    </div>
+    <div>
+        <label for="fileName">FileName: </label>
+        <input type="text" id="fileName" name="fileName" size="10">
+    </div>
+    <div>
+        <label for="minute">Minute (between 0 and 59):</label>
+        <input type="number" id="minute" name="minute" min="0" max="59">
+    </div>
+    <div>
+        <label for="hour">Hour (between 0 and 59):</label>
+        <input type="number" id="hour" name="hour" min="0" max="23">
+    </div>
+    <input type="submit" value="Add Task">
+</form>
+</body>
+</html>
