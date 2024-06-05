@@ -2,8 +2,8 @@ package io.taskrunner
 
 class FakeTaskRepository : TaskRepository {
     private val tasks = mutableListOf(
-        Task(null, null, "taskA", "TaskA.kt" ),
-        Task(0, 10, "taskB", "TaskB.kt" )
+        Task("taskA", "TaskA.kt" , null, null),
+        Task( "taskB", "TaskB.kt" , 99, 100)
     )
 
     fun taskByName(name: String) = tasks.find {

@@ -37,9 +37,9 @@ fun Application.module() {
 
 fun configureDatabases() {
     Database.connect(
-        "jdbc:postgresql://localhost:5432/ktor_tutorial_db",
-        user = "postgres",
-        password = "password"
+        "jdbc:postgresql://localhost:5432/taskrunner_db",
+        user = "taskrunner_readwriter",
+        password = "xfdz8t-mds-V"
     )
 }
 
@@ -58,13 +58,13 @@ fun Application.configureRouting(repository: TaskRepository) {
     routing {
         post("/tasks") {
             val formContent = call.receiveParameters()
-            val minute = formContent["minute"]?.toIntOrNull()
-            val hour = formContent["hour"]?.toIntOrNull()
             val name = formContent["name"].toString()
             val fileName = formContent["fileName"].toString()
+            val minute = formContent["minute"]?.toIntOrNull()
+            val hour = formContent["hour"]?.toIntOrNull()
 
             val task = Task(
-                minute, hour, name, fileName
+                name, fileName, minute, hour
             )
             try {
                 repository.addTask(task)

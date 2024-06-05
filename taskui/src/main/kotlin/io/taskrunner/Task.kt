@@ -8,9 +8,9 @@ enum class Status {
 
 @Serializable
 data class Task(
-    val minute: Int?,
-    val hour: Int?,
     val name: String,
     val fileName: String,
+    val minute: Int?,
+    val hour: Int?,
     val status: Status = Status.SCHEDULED
 )
