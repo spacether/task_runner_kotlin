@@ -29,7 +29,7 @@ fun main() {
 }
 
 fun Application.module() {
-    val repository = FakeTaskRepository()
+    val repository = DbTaskRepository()
     configureRouting(repository)
     configureDatabases()
     configureTemplating()

@@ -6,7 +6,7 @@ CREATE DATABASE taskrunner_db WITH OWNER taskrunner_readwriter;
 \c taskrunner_db
 create table tasks (
   name varchar(255) NOT NULL PRIMARY KEY,
-  fileName varchar(255) NOT NULL,
+  filename varchar(255) NOT NULL,
   minute SMALLINT,
   hour SMALLINT,
   status varchar(255)

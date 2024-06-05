@@ -11,9 +11,9 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-object TaskTable : IdTable<String>() {
+object TaskTable : IdTable<String>(name="tasks") {
     override val id: Column<EntityID<String>> = varchar("name", 50).entityId()
-    val fileName = varchar("fileName", 50)
+    val fileName = varchar("filename", 50)
     val minute = integer("minute").nullable()
     val hour = integer("hour").nullable()
     val status = varchar("status", 50)
