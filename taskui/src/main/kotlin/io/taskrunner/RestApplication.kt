@@ -71,6 +71,8 @@ fun Application.configureRouting(repository: TaskRepository) {
                 call.respond(
                     ThymeleafContent("tasks", mapOf("tasks" to repository.allTasks()))
                 )
+            } catch (ex: Throwable) {
+                call.respond(HttpStatusCode.BadRequest, message=ex.message!!)
             } catch (ex: IllegalStateException) {
                 call.respond(HttpStatusCode.BadRequest, message=ex.message!!)
             }
