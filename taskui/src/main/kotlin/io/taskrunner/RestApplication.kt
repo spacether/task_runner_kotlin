@@ -1,14 +1,19 @@
 package io.taskrunner
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 import io.ktor.server.thymeleaf.Thymeleaf
 import io.ktor.server.thymeleaf.ThymeleafContent
+import org.jetbrains.exposed.sql.Database
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 /**
@@ -20,8 +25,22 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 fun main() {
     embeddedServer(Netty, port = 8080) {
         module()
-        configureTemplating()
     }.start(wait = true)
+}
+
+fun Application.module() {
+    val repository = DbTaskRepository()
+    configureRouting(repository)
+    configureDatabases()
+    configureTemplating()
+}
+
+fun configureDatabases() {
+    Database.connect(
+        "jdbc:postgresql://localhost:5432/taskrunner_db",
+        user = "taskrunner_readwriter",
+        password = "xfdz8t-mds-V"
+    )
 }
 
 fun Application.configureTemplating() {
@@ -34,38 +53,32 @@ fun Application.configureTemplating() {
     }
 }
 
-fun Application.module() {
-    val tasksByName = mutableMapOf(
-        "taskA" to Task(null, null, "taskA", "TaskA.kt" ),
-        "taskB" to Task(0, 10, "taskB", "TaskB.kt" )
-    )
+
+fun Application.configureRouting(repository: TaskRepository) {
     routing {
         post("/tasks") {
             val formContent = call.receiveParameters()
-            val minute = formContent["minute"]?.toIntOrNull()
-            val hour = formContent["hour"]?.toIntOrNull()
             val name = formContent["name"].toString()
             val fileName = formContent["fileName"].toString()
+            val minute = formContent["minute"]?.toIntOrNull()
+            val hour = formContent["hour"]?.toIntOrNull()
 
             val task = Task(
-                minute, hour, name, fileName
+                name, fileName, minute, hour
             )
             try {
-                if (tasksByName.contains(task.name)) {
-                   throw IllegalArgumentException("Invalid name. Name already exists.")
-                }
-                tasksByName[task.name] = task
+                repository.addTask(task)
                 call.respond(
-                    ThymeleafContent("tasks", mapOf("tasks" to tasksByName.values))
+                    ThymeleafContent("tasks", mapOf("tasks" to repository.allTasks()))
                 )
-            } catch (ex: IllegalArgumentException) {
+            } catch (ex: Throwable) {
                 call.respond(HttpStatusCode.BadRequest, message=ex.message!!)
             } catch (ex: IllegalStateException) {
-                call.respond(HttpStatusCode.BadRequest)
+                call.respond(HttpStatusCode.BadRequest, message=ex.message!!)
             }
         }
         get("/tasks") {
-            call.respond(ThymeleafContent("tasks", mapOf("tasks" to tasksByName.values)))
+            call.respond(ThymeleafContent("tasks", mapOf("tasks" to repository.allTasks())))
         }
     }
 }
