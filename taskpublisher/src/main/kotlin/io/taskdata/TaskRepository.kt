@@ -1,4 +1,4 @@
-package io.taskpublisher
+package io.taskdata
 
 interface TaskRepository {
     suspend fun allTasks(): List<Task>

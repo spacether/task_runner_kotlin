@@ -6,6 +6,8 @@ import kotlinx.coroutines.*
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import com.rabbitmq.client.ConnectionFactory
+import io.taskdata.DbTaskRepository
+import io.taskdata.TaskRepository
 
 class Settings {
     companion object {

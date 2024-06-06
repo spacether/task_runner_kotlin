@@ -1,4 +1,4 @@
-package io.taskpublisher
+package io.taskdata
 
 import kotlinx.serialization.Serializable
 

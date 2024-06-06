@@ -9,3 +9,4 @@ Execute this command to run this sample:
 brew services start rabbitmq
 ./gradlew run
 ```
+browse to http://localhost:15672/ with guest guest for rabbitmq visibility
