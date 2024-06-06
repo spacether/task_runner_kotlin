@@ -12,6 +12,10 @@ class FakeTaskRepository : TaskRepository {
 
     override suspend fun allTasks(): List<Task> = tasks
 
+    override suspend fun queryTasks(hour: Int, minute: Int): List<Task> {
+        return listOf()
+    }
+
     override suspend fun addTask(task: Task) {
         if (taskByName(task.name) != null) {
             throw IllegalStateException("Cannot duplicate task names!")
