@@ -1,7 +1,7 @@
-package io.taskrunner.db
+package io.taskdata.db
 
-import io.taskrunner.Status
-import io.taskrunner.Task
+import io.taskmodels.Status
+import io.taskmodels.Task
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
