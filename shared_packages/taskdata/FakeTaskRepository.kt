@@ -1,5 +1,8 @@
 package io.taskdata
 
+import io.taskmodels.Task
+
+
 class FakeTaskRepository : TaskRepository {
     private val tasks = mutableListOf(
         Task("taskA", "TaskA.kt" , null, null),

@@ -1,5 +1,6 @@
 package io.taskdata
 
+import io.taskmodels.Task
 import io.taskdata.db.TaskDAO
 import io.taskdata.db.TaskTable
 import io.taskdata.db.daoToModel

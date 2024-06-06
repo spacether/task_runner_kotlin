@@ -1,10 +1,6 @@
-package io.taskdata
+package io.taskmodels
 
 import kotlinx.serialization.Serializable
-
-enum class Status {
-    COMPLETED, RUNNING, FAILED, SCHEDULED
-}
 
 @Serializable
 data class Task(

@@ -8,6 +8,9 @@ import kotlin.time.toDuration
 import com.rabbitmq.client.ConnectionFactory
 import io.taskdata.DbTaskRepository
 import io.taskdata.TaskRepository
+import io.taskmodels.TaskMessage
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class Settings {
     companion object {
@@ -31,9 +34,15 @@ suspend fun publishTask(repository: TaskRepository) {
 
     channel.queueDeclare(Settings.QUEUE_NAME, true, false, false, null)
     for (task in tasks) {
-        val message = "Hello World!"
-        channel.basicPublish("", Settings.QUEUE_NAME, null, message.toByteArray(charset("UTF-8")))
-        println(" [x] Sent '$message'")
+        val triggerTime = "${String.format("%02d", hour)}:${String.format("%02d", minute)}"
+        val taskMessage = TaskMessage(
+            task=task,
+            triggerTime=triggerTime,
+            timesRun=0
+        )
+        val rawMessage = Json.encodeToString(taskMessage).toByteArray()
+        channel.basicPublish("", Settings.QUEUE_NAME, null, rawMessage)
+        println(" [x] Sent '$taskMessage'")
     }
     channel.close()
     connection.close()
