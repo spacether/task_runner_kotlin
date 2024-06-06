@@ -8,9 +8,9 @@ import java.io.IOException
 import kotlinx.serialization.json.Json
 import io.taskmodels.TaskMessage
 import kotlinx.serialization.encodeToString
-import io.tasks.TaskA
-import io.tasks.TaskB
-import io.tasks.TaskC
+import io.tasks.FiveSecondTask
+import io.tasks.TenSecondTask
+import io.tasks.FailingTask
 
 class Worker {
     companion object {
@@ -19,9 +19,9 @@ class Worker {
 
         fun doWork(taskMessage: TaskMessage) {
             when(taskMessage.task.fileName) {
-                "TaskA.kt" -> TaskA().run()
-                "TaskB.kt" -> TaskB().run()
-                "TaskC.kt" -> TaskC().run()
+                "FiveSecondTask.kt" -> FiveSecondTask().run()
+                "TenSecondTask.kt" -> TenSecondTask().run()
+                "FailingTask.kt" -> FailingTask().run()
                 else -> throw RuntimeException("Unknown task fileName ${taskMessage.task.fileName}")
             }
             print(taskMessage)
