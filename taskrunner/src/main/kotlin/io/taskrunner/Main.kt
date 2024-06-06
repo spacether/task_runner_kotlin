@@ -7,14 +7,24 @@ import com.rabbitmq.client.Envelope
 import java.io.IOException
 import kotlinx.serialization.json.Json
 import io.taskmodels.TaskMessage
+import kotlinx.serialization.encodeToString
+import io.tasks.TaskA
+import io.tasks.TaskB
+import io.tasks.TaskC
 
 class Worker {
     companion object {
-        const val TASK_QUEUE_NAME = "tasks"
+        const val QUEUE_NAME = "tasks"
+        const val MAX_TRIES = 3
 
-        fun doWork(message: String) {
-            val tasmMessage = Json.decodeFromString<TaskMessage>(message)
-            print(tasmMessage)
+        fun doWork(taskMessage: TaskMessage) {
+            when(taskMessage.task.fileName) {
+                "TaskA.kt" -> TaskA().run()
+                "TaskB.kt" -> TaskB().run()
+                "TaskC.kt" -> TaskC().run()
+                else -> throw RuntimeException("Unknown task fileName ${taskMessage.task.fileName}")
+            }
+            print(taskMessage)
         }
     }
 }
@@ -25,7 +35,7 @@ fun main() {
     val connection = factory.newConnection()
     val channel = connection.createChannel()
 
-    channel.queueDeclare(Worker.TASK_QUEUE_NAME, true, false, false, null)
+    channel.queueDeclare(Worker.QUEUE_NAME, true, false, false, null)
     println(" [*] Waiting for messages. To exit press CTRL+C")
 
     channel.basicQos(1)
@@ -34,11 +44,20 @@ fun main() {
         @Throws(IOException::class)
         override fun handleDelivery(consumerTag: String, envelope: Envelope, properties: AMQP.BasicProperties, body: ByteArray) {
             val message = String(body, charset("UTF-8"))
+            val taskMessage = Json.decodeFromString<TaskMessage>(message)
 
             println(" [x] Received '$message'")
             try {
-                Worker.doWork(message)
+                Worker.doWork(taskMessage)
             } catch (e: Exception) {
+                taskMessage.timesRun += 1
+                if (taskMessage.timesRun < Worker.MAX_TRIES) {
+                    val rawMessage = Json.encodeToString(taskMessage).toByteArray()
+                    channel.basicPublish("", Worker.QUEUE_NAME, null, rawMessage)
+                    println(" [x] Re-publish '$taskMessage'")
+                } else {
+                    println(" [x] Final failing try for '$taskMessage'")
+                }
                 print(e.message)
             } finally {
                 println(" [x] Done")
@@ -46,5 +65,5 @@ fun main() {
             }
         }
     }
-    channel.basicConsume(Worker.TASK_QUEUE_NAME, false, consumer)
+    channel.basicConsume(Worker.QUEUE_NAME, false, consumer)
 }
