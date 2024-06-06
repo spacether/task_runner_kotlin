@@ -1,4 +1,4 @@
-package io.taskrunner
+package io.taskdata
 
 import kotlinx.serialization.Serializable
 

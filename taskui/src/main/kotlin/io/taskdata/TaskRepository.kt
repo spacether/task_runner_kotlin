@@ -1,4 +1,4 @@
-package io.taskrunner
+package io.taskdata
 
 interface TaskRepository {
     suspend fun allTasks(): List<Task>

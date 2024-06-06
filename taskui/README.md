@@ -15,3 +15,9 @@ create table tasks (
 INSERT INTO tasks (name, filename, minute, hour, status) VALUES ('taskA', 'TaskA.kt', null, null, 'SCHEDULED');
 INSERT INTO tasks (name, filename, minute, hour, status) VALUES ('taskB', 'taskB.kt', 1, 2, 'SCHEDULED');
 ```
+
+## Running
+```
+./gradlew run
+```
+then browse to http://0.0.0.0:8080/tasks

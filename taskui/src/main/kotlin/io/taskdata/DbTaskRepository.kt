@@ -1,9 +1,9 @@
-package io.taskrunner
+package io.taskdata
 
-import io.taskrunner.db.TaskDAO
-import io.taskrunner.db.TaskTable
-import io.taskrunner.db.daoToModel
-import io.taskrunner.db.suspendTransaction
+import io.taskdata.db.TaskDAO
+import io.taskdata.db.TaskTable
+import io.taskdata.db.daoToModel
+import io.taskdata.db.suspendTransaction
 import org.jetbrains.exposed.dao.id.EntityID
 
 class DbTaskRepository: TaskRepository {
