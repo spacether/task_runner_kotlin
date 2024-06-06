@@ -1,12 +1,17 @@
 package io.taskdata
 
-import io.taskmodels.Task
 import io.taskdata.db.TaskDAO
 import io.taskdata.db.TaskTable
 import io.taskdata.db.daoToModel
 import io.taskdata.db.suspendTransaction
+import io.taskmodels.Task
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class DbTaskRepository: TaskRepository {
     override suspend fun allTasks(): List<Task> = suspendTransaction {
@@ -19,8 +24,14 @@ class DbTaskRepository: TaskRepository {
             fileName = task.fileName
             hour = task.hour
             minute = task.minute
-            status = task.status.name
         }
+    }
+
+    override suspend fun removeTask(name: String): Boolean = suspendTransaction {
+        val rowsDeleted = TaskTable.deleteWhere {
+            TaskTable.id eq name
+        }
+        rowsDeleted == 1
     }
 
     override suspend fun queryTasks(hour: Int, minute: Int): List<Task> {

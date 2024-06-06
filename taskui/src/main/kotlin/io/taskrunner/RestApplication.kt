@@ -8,14 +8,15 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.thymeleaf.Thymeleaf
 import io.ktor.server.thymeleaf.ThymeleafContent
 import io.taskdata.DbTaskRepository
-import io.taskmodels.Task
 import io.taskdata.TaskRepository
+import io.taskmodels.Task
 import org.jetbrains.exposed.sql.Database
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
@@ -59,6 +60,19 @@ fun Application.configureTemplating() {
 
 fun Application.configureRouting(repository: TaskRepository) {
     routing {
+        delete("/tasks/{taskName}") {
+            val name = call.parameters["taskName"]
+            if (name == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@delete
+            }
+
+            if (repository.removeTask(name)) {
+                call.respond(HttpStatusCode.NoContent)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
         post("/tasks") {
             val formContent = call.receiveParameters()
             val name = formContent["name"].toString()
