@@ -1,11 +1,14 @@
 package io.taskrunner
 
+import com.rabbitmq.client.ConnectionFactory
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.routing.delete
@@ -17,6 +20,7 @@ import io.ktor.server.thymeleaf.ThymeleafContent
 import io.taskdata.DbTaskRepository
 import io.taskdata.TaskRepository
 import io.taskmodels.Task
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Database
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
@@ -25,6 +29,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
  * and registers the [module].
  *
  */
+const val QUEUE_NAME = "tasks"
 
 fun main() {
     embeddedServer(Netty, port = 8080) {
@@ -36,7 +41,7 @@ fun Application.module() {
     val repository = DbTaskRepository()
     configureRouting(repository)
     configureDatabases()
-    configureTemplating()
+    configureTemplatingAndContentNegotiation()
 }
 
 fun configureDatabases() {
@@ -47,7 +52,10 @@ fun configureDatabases() {
     )
 }
 
-fun Application.configureTemplating() {
+fun Application.configureTemplatingAndContentNegotiation() {
+    install(ContentNegotiation) {
+        json()
+    }
     install(Thymeleaf) {
         setTemplateResolver(ClassLoaderTemplateResolver().apply {
             prefix = "templates/"
@@ -57,9 +65,24 @@ fun Application.configureTemplating() {
     }
 }
 
+@Serializable
+data class QueueInfo(
+    val messageCount: Int
+)
 
 fun Application.configureRouting(repository: TaskRepository) {
     routing {
+        get("/queue_info") {
+            val factory = ConnectionFactory()
+            factory.host = "localhost"
+            val connection = factory.newConnection()
+            val channel = connection.createChannel()
+            val declareOk = channel.queueDeclare(QUEUE_NAME, true, false, false, null)
+            val messageCount = declareOk.messageCount
+            println("messageCount=$messageCount")
+            call.respond(QueueInfo(messageCount))
+
+        }
         delete("/tasks/{taskName}") {
             val name = call.parameters["taskName"]
             if (name == null) {
