@@ -23,6 +23,11 @@
 </head>
 <body>
 <h1>All Current Tasks</h1>
+<p>This is the task definition.
+    Tasks here reoccur when current_minute=minute, and current_hour=hour.
+    If the value for minute is unset (blank) then the task runs every minute.
+    If the value for hour is unset (blank) then the task runs every hour.
+</p>
 <table>
     <thead>
     <tr>
@@ -43,6 +48,11 @@
     </tr>
     </tbody>
 </table>
+<h2>Number of Pending Tasks in RabbitMq Tasks Queue</h2>
+<p>When a task definition requires that a task is run in this minute, that task is sent as a message in the RabbitMQ queue.
+    The task is run 3 times max if it fails.
+</p>
+<p th:text="${queueMessageCount}"></p>
 <h2>Add A Task</h2>
 <form method="post" action="/tasks">
     <div>

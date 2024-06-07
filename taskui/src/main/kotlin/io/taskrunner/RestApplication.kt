@@ -70,15 +70,19 @@ data class QueueInfo(
     val messageCount: Int
 )
 
+fun getQueueMessageCount(): Int {
+    val factory = ConnectionFactory()
+    factory.host = "localhost"
+    val connection = factory.newConnection()
+    val channel = connection.createChannel()
+    val declareOk = channel.queueDeclare(QUEUE_NAME, true, false, false, null)
+    return declareOk.messageCount
+}
+
 fun Application.configureRouting(repository: TaskRepository) {
     routing {
         get("/queue_info") {
-            val factory = ConnectionFactory()
-            factory.host = "localhost"
-            val connection = factory.newConnection()
-            val channel = connection.createChannel()
-            val declareOk = channel.queueDeclare(QUEUE_NAME, true, false, false, null)
-            val messageCount = declareOk.messageCount
+            val messageCount = getQueueMessageCount()
             println("messageCount=$messageCount")
             call.respond(QueueInfo(messageCount))
 
@@ -108,8 +112,12 @@ fun Application.configureRouting(repository: TaskRepository) {
             )
             try {
                 repository.addTask(task)
+                val templateInfo = mapOf(
+                    "tasks" to repository.allTasks(),
+                    "queueMessageCount" to getQueueMessageCount()
+                )
                 call.respond(
-                    ThymeleafContent("tasks", mapOf("tasks" to repository.allTasks()))
+                    ThymeleafContent("tasks", templateInfo)
                 )
             } catch (ex: Throwable) {
                 call.respond(HttpStatusCode.BadRequest, message=ex.message!!)
@@ -118,7 +126,11 @@ fun Application.configureRouting(repository: TaskRepository) {
             }
         }
         get("/tasks") {
-            call.respond(ThymeleafContent("tasks", mapOf("tasks" to repository.allTasks())))
+            val templateInfo = mapOf(
+                "tasks" to repository.allTasks(),
+                "queueMessageCount" to getQueueMessageCount()
+            )
+            call.respond(ThymeleafContent("tasks", templateInfo))
         }
     }
 }
