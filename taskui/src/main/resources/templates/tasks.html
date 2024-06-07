@@ -3,9 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>All Current Tasks</title>
+    <script type="application/javascript">
+        function deleteTask(name) {
+            deleteTaskWithName(name).then(() => {
+                location.replace(location.href);
+            })
+        }
+
+        function deleteTaskWithName(name) {
+            return sendDELETE(`/tasks/${name}`)
+        }
+
+        function sendDELETE(url) {
+            return fetch(url, {
+                method: "DELETE"
+            });
+        }
+    </script>
 </head>
 <body>
 <h1>All Current Tasks</h1>
+<p>This is the task definition.
+    Tasks here reoccur when current_minute=minute, and current_hour=hour.
+    If the value for minute is unset (blank) then the task runs every minute.
+    If the value for hour is unset (blank) then the task runs every hour.
+</p>
 <table>
     <thead>
     <tr>
@@ -13,7 +35,7 @@
         <th>FileName</th>
         <th>Minute</th>
         <th>Hour</th>
-        <th>Status</th>
+        <th>Delete Link</th>
     </tr>
     </thead>
     <tbody>
@@ -22,10 +44,15 @@
         <td th:text="${task.fileName}"></td>
         <td th:text="${task.minute}"></td>
         <td th:text="${task.hour}"></td>
-        <td th:text="${task.status}"></td>
+        <td><a th:href="'javascript:deleteTask(\'' + ${task.name} + '\')'">delete task</a></td>
     </tr>
     </tbody>
 </table>
+<h2>Number of Pending Tasks in RabbitMq Tasks Queue</h2>
+<p>When a task definition requires that a task is run in this minute, that task is sent as a message in the RabbitMQ queue.
+    The task is run 3 times max if it fails.
+</p>
+<p th:text="${queueMessageCount}"></p>
 <h2>Add A Task</h2>
 <form method="post" action="/tasks">
     <div>
@@ -34,7 +61,11 @@
     </div>
     <div>
         <label for="fileName">FileName: </label>
-        <input type="text" id="fileName" name="fileName" size="10">
+        <select id="fileName" name="fileName">
+            <option value="FiveSecondTask.kt">FiveSecondTask.kt</option>
+            <option value="TenSecondTask.kt">TenSecondTask.kt</option>
+            <option value="FailingTask.kt">FailingTask.kt</option>
+        </select>
     </div>
     <div>
         <label for="minute">Minute (between 0 and 59):</label>

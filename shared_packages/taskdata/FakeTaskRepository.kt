@@ -5,8 +5,8 @@ import io.taskmodels.Task
 
 class FakeTaskRepository : TaskRepository {
     private val tasks = mutableListOf(
-        Task("taskA", "TaskA.kt" , null, null),
-        Task( "taskB", "TaskB.kt" , 99, 100)
+        Task("taskA", "FiveSecondTask.kt" , null, null),
+        Task( "taskB", "TenSecondTask.kt" , 99, 100)
     )
 
     fun taskByName(name: String) = tasks.find {
@@ -24,5 +24,14 @@ class FakeTaskRepository : TaskRepository {
             throw IllegalStateException("Cannot duplicate task names!")
         }
         tasks.add(task)
+    }
+
+    override suspend fun removeTask(name: String): Boolean {
+        val task = taskByName(name)
+        task?.let {
+            tasks.remove(it)
+            return true
+        }
+        return false
     }
 }

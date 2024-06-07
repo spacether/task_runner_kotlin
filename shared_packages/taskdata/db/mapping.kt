@@ -1,6 +1,5 @@
 package io.taskdata.db
 
-import io.taskmodels.Status
 import io.taskmodels.Task
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.dao.Entity
@@ -16,7 +15,6 @@ object TaskTable : IdTable<String>(name="tasks") {
     val fileName = varchar("filename", 50)
     val minute = integer("minute").nullable()
     val hour = integer("hour").nullable()
-    val status = varchar("status", 50)
 }
 
 abstract class TextEntity(id: EntityID<String>) : Entity<String>(id)
@@ -31,7 +29,6 @@ class TaskDAO(id: EntityID<String>) : TextEntity(id) {
     var fileName by TaskTable.fileName
     var minute by TaskTable.minute
     var hour by TaskTable.hour
-    var status by TaskTable.status
 }
 
 suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
@@ -43,5 +40,4 @@ fun daoToModel(dao: TaskDAO) = Task(
     fileName=dao.fileName,
     hour=dao.hour,
     minute=dao.minute,
-    status = Status.valueOf(dao.status)
 )

@@ -7,6 +7,5 @@ data class Task(
     val name: String,
     val fileName: String,
     val minute: Int?,
-    val hour: Int?,
-    val status: Status = Status.SCHEDULED
+    val hour: Int?
 )
